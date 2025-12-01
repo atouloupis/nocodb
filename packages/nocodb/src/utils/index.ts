@@ -10,6 +10,6 @@ export * from './audit';
 export * from './processUtils';
 export * from './envs';
 
-export const isEE = false;
+export const isEE = true;
 export const isOnPrem = false;
 export const isCloud = false;

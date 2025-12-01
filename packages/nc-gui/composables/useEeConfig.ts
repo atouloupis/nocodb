@@ -35,7 +35,7 @@ export const useEeConfig = createSharedComposable(() => {
 
   const gracePeriodEndDate = computed(() => '')
 
-  const isWsAuditEnabled = computed(() => false)
+  const isWsAuditEnabled = computed(() => true)
 
   const isAllowToAddExtension = computed(() => true)
 
@@ -49,7 +49,7 @@ export const useEeConfig = createSharedComposable(() => {
 
   const isTopBannerVisible = computed(() => false)
 
-  const blockWsImageLogoUpload = computed(() => true)
+  const blockWsImageLogoUpload = computed(() => false)
 
   const blockCurrentUserFilter = computed(() => false)
 
