@@ -53,17 +53,17 @@ export const useEeConfig = createSharedComposable(() => {
 
   const blockCurrentUserFilter = computed(() => false)
 
-  const blockRowColoring = computed(() => true)
+  const blockRowColoring = computed(() => false)
 
-  const blockTableAndFieldPermissions = computed(() => true)
+  const blockTableAndFieldPermissions = computed(() => false)
 
-  const blockPrivateBases = computed(() => true)
+  const blockPrivateBases = computed(() => false)
 
-  const blockAddNewDashboard = computed(() => true)
+  const blockAddNewDashboard = computed(() => false)
 
-  const blockCalendarRange = computed(() => true)
+  const blockCalendarRange = computed(() => false)
 
-  const blockAddNewScript = computed(() => true)
+  const blockAddNewScript = computed(() => false)
 
   const showUserMayChargeAlert = computed(() => false)
 
@@ -72,9 +72,9 @@ export const useEeConfig = createSharedComposable(() => {
     return Math.max(1, +appInfo.value.ncMaxAttachmentsAllowed || 50)
   })
 
-  const blockAiPromptField = computed(() => true)
+  const blockAiPromptField = computed(() => false)
 
-  const blockAiButtonField = computed(() => true)
+  const blockAiButtonField = computed(() => false)
 
   const calculatePrice = (..._args: any[]) => {}
 

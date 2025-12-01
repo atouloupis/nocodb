@@ -57,6 +57,7 @@ import { NotificationsController } from '~/controllers/notifications.controller'
 import { OrgLcenseController } from '~/controllers/org-lcense.controller';
 import { OrgTokensController } from '~/controllers/org-tokens.controller';
 import { OrgUsersController } from '~/controllers/org-users.controller';
+import { PermissionsController } from '~/controllers/permissions.controller';
 import { PluginsController } from '~/controllers/plugins.controller';
 import { PublicMetasController } from '~/controllers/public-metas.controller';
 import { SharedBasesController } from '~/controllers/shared-bases.controller';
@@ -98,6 +99,7 @@ import { OrgLcenseService } from '~/services/org-lcense.service';
 import { OrgTokensEeService } from '~/services/org-tokens-ee.service';
 import { OrgTokensService } from '~/services/org-tokens.service';
 import { OrgUsersService } from '~/services/org-users.service';
+import { PermissionsService } from '~/services/permissions.service';
 import { PluginsService } from '~/services/plugins.service';
 import { PublicMetasService } from '~/services/public-metas.service';
 import { SharedBasesService } from '~/services/shared-bases.service';
@@ -203,6 +205,7 @@ export const nocoModuleMetadata = {
           OrgLcenseController,
           OrgTokensController,
           OrgUsersController,
+          PermissionsController,
           PluginsController,
           BaseUsersController,
           BasesController,
@@ -287,6 +290,7 @@ export const nocoModuleMetadata = {
     OrgTokensEeService,
     OrgTokensService,
     OrgUsersService,
+    PermissionsService,
     PluginsService,
     BaseUsersService,
     BaseMembersV3Service,
