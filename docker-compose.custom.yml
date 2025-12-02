@@ -1,0 +1,122 @@
+# ============================================================================
+# Docker Compose - NocoDB Version Modifiée (Fonctionnalités Débloquées)
+# ============================================================================
+# Ce fichier docker-compose déploie votre version modifiée de NocoDB
+# avec toutes les fonctionnalités Enterprise débloquées
+#
+# Usage:
+#   docker-compose -f docker-compose.custom.yml up -d
+# ============================================================================
+
+services:
+  nocodb-unlocked:
+    # Utilise l'image buildée localement
+    image: nocodb-unlocked:latest
+
+    # Nom du container
+    container_name: nocodb-unlocked
+
+    # Redémarrage automatique
+    restart: unless-stopped
+
+    # Port mapping (même configuration que votre setup actuel)
+    ports:
+      - "8090:8080"
+
+    # Variables d'environnement
+    environment:
+      # Configuration de la base de données PostgreSQL
+      # IMPORTANT: Remplacez avec vos vraies informations
+      NC_DB: "pg://10.70.11.101:5432?u=test&p=test&d=test"
+
+      # Secret JWT pour l'authentification
+      # IMPORTANT: Utilisez votre propre secret sécurisé
+      NC_AUTH_JWT_SECRET: "569a1821-0a93-45e8-87ab-eb857f20a010"
+
+      # Désactiver la télémétrie (optionnel)
+      NC_DISABLE_TELE: "true"
+
+      # Mode production
+      NODE_ENV: "production"
+
+      # Port interne (ne pas changer)
+      PORT: "8080"
+
+      # Optionnel: Augmenter les limites
+      NC_MAX_ATTACHMENTS_ALLOWED: "100"
+      NC_ATTACHMENT_FIELD_SIZE: "104857600"  # 100MB
+
+      # Timezone (optionnel)
+      TZ: "Europe/Paris"
+
+    # Volumes pour la persistance des données
+    volumes:
+      # Même volume que votre configuration actuelle
+      - ./nocodb:/home/app/data
+
+      # Optionnel: Logs persistants
+      # - ./logs:/app/logs
+
+    # Healthcheck pour vérifier que l'application fonctionne
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Limites de ressources (optionnel, ajustez selon vos besoins)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 4G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 2G
+
+    # Réseau (optionnel)
+    # networks:
+    #   - nocodb-network
+
+# Optionnel: Définir un réseau personnalisé
+# networks:
+#   nocodb-network:
+#     driver: bridge
+
+# ============================================================================
+# NOTES IMPORTANTES
+# ============================================================================
+#
+# 1. AVANT DE LANCER:
+#    - Buildez l'image avec: ./build-and-deploy.sh
+#    - Ou manuellement: docker build -f Dockerfile.custom -t nocodb-unlocked:latest .
+#
+# 2. CONFIGURATION DATABASE:
+#    - Le format de NC_DB est: pg://host:port?u=user&p=password&d=database
+#    - Assurez-vous que PostgreSQL est accessible depuis le container
+#    - Pour un PostgreSQL local, utilisez l'IP de l'hôte (pas localhost)
+#
+# 3. SÉCURITÉ:
+#    - Changez NC_AUTH_JWT_SECRET avec une valeur unique et sécurisée
+#    - Ne commitez JAMAIS ce fichier avec les vraies credentials
+#    - Utilisez un fichier .env pour les secrets (voir .env.example ci-dessous)
+#
+# 4. MIGRATION DEPUIS VOTRE VERSION ACTUELLE:
+#    - Arrêtez le container actuel: docker stop nocodb-postgres
+#    - Lancez cette version: docker-compose -f docker-compose.custom.yml up -d
+#    - Les données sont préservées (même volume ./nocodb)
+#
+# 5. ACCÈS:
+#    - L'application sera accessible sur: http://localhost:8090
+#    - Ou http://votre-ip-serveur:8090
+#
+# 6. LOGS:
+#    - Voir les logs: docker-compose -f docker-compose.custom.yml logs -f
+#    - Logs en temps réel: docker logs -f nocodb-unlocked
+#
+# 7. MISE À JOUR:
+#    - Rebuild l'image avec les dernières modifications
+#    - Redéployez: docker-compose -f docker-compose.custom.yml up -d --build
+#
+# ============================================================================

@@ -1,0 +1,87 @@
+# ============================================================================
+# Dockerfile pour NocoDB Version Modifiée (Fonctionnalités Débloquées)
+# ============================================================================
+# Ce Dockerfile construit NocoDB avec toutes les fonctionnalités Enterprise
+# débloquées à partir du code source modifié
+# ============================================================================
+
+# ============================================================================
+# Stage 1: Builder - Build l'application
+# ============================================================================
+FROM node:22-alpine AS builder
+
+# Installer pnpm
+RUN npm install -g pnpm@9
+
+# Créer le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de configuration pnpm/lerna
+COPY package.json pnpm-workspace.yaml lerna.json pnpm-lock.yaml ./
+COPY .npmrc* ./
+
+# Copier tous les packages
+COPY packages ./packages
+COPY scripts ./scripts
+
+# Installer les dépendances
+RUN pnpm install --frozen-lockfile
+
+# Bootstrap le monorepo (build SDK, etc.)
+RUN pnpm run bootstrap
+
+# Build le backend
+WORKDIR /app/packages/nocodb
+RUN pnpm run build
+
+# Build le frontend
+WORKDIR /app/packages/nc-gui
+RUN pnpm run build
+
+# ============================================================================
+# Stage 2: Production - Image finale légère
+# ============================================================================
+FROM node:22-alpine
+
+# Installer pnpm
+RUN npm install -g pnpm@9
+
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup -g 1000 nocodb && \
+    adduser -u 1000 -G nocodb -s /bin/sh -D nocodb
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /home/app/data && \
+    chown -R nocodb:nocodb /home/app
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers buildés depuis le stage builder
+COPY --from=builder --chown=nocodb:nocodb /app/packages/nocodb/package.json ./packages/nocodb/
+COPY --from=builder --chown=nocodb:nocodb /app/packages/nocodb/dist ./packages/nocodb/dist
+COPY --from=builder --chown=nocodb:nocodb /app/packages/nocodb/node_modules ./packages/nocodb/node_modules
+COPY --from=builder --chown=nocodb:nocodb /app/packages/nocodb-sdk ./packages/nocodb-sdk
+COPY --from=builder --chown=nocodb:nocodb /app/node_modules ./node_modules
+
+# Copier le frontend buildé dans le backend
+COPY --from=builder --chown=nocodb:nocodb /app/packages/nc-gui/.output/public ./packages/nocodb/dist/public
+
+# Changer vers l'utilisateur nocodb
+USER nocodb
+
+# Exposer le port
+EXPOSE 8080
+
+# Variables d'environnement par défaut
+ENV NODE_ENV=production \
+    NC_DISABLE_TELE=true \
+    PORT=8080
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8080/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Démarrer l'application
+WORKDIR /app/packages/nocodb
+CMD ["node", "dist/bundle.js"]
